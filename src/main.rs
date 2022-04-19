@@ -45,8 +45,9 @@ fn main() -> Result<(), Box<dyn Error>> {
             );
         }
 
-        // if block_extra.height < 610682 {
-        if block_extra.height < 100 {
+        // First block of 2020
+        if block_extra.height < 610682 {
+        // if block_extra.height < 100 {
             continue;
         }
 
