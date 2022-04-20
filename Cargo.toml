@@ -9,5 +9,8 @@ edition = "2021"
 blocks_iterator = "0.11"
 env_logger = "0.9"
 bitcoin = "0.27"
-miniscript = "=6.0.1"
+
 log = "0.4"
+# Revision with 6.0.1 version
+miniscript-old = { package = "miniscript", git = "https://github.com/rust-bitcoin/rust-miniscript", rev ="d1c6b9f91b3d0ac35b8fdc7b6633214b07e10d8d" }
+miniscript-new = { package = "miniscript", version = "6.1.0" }
