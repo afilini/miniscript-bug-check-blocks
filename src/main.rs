@@ -83,24 +83,23 @@ fn main() -> Result<(), Box<dyn Error>> {
     let config = Config::from_args();
 
     blocks_iterator::iter(config)
+        .filter(|block_extra| block_extra.height >= 610_682) // First block of 2020
         .flat_map(|mut block_extra| {
-            if block_extra.height < 1_000_000 {
-                return Vec::new();
-            }
-            let mut vec = vec![];
-            for tx in block_extra.block.txdata {
-                for txin in tx.input {
+            block_extra
+                .block
+                .txdata
+                .into_iter()
+                .flat_map(|tx| tx.input)
+                .map(move |txin| {
                     let txout = block_extra
                         .outpoint_values
                         .remove(&txin.previous_output)
                         .unwrap();
-                    vec.push((txout, txin));
-                }
-            }
-            vec
+                    (txout.script_pubkey, txin)
+                })
         })
         .par_bridge()
-        .for_each(|(txout, input)| {
+        .for_each(|(script_pubkey, input)| {
             fn check<Ctx: ScriptContext, Ctx2: miniscript_new::ScriptContext>(
                 s: &Script,
                 prev_out: &bitcoin::OutPoint,
@@ -114,7 +113,6 @@ fn main() -> Result<(), Box<dyn Error>> {
                 }
             }
 
-            let script_pubkey = &txout.script_pubkey;
             if script_pubkey.is_p2sh() {
                 if input.script_sig.is_v0_p2wsh() {
                     check::<Segwitv0, miniscript_new::Segwitv0>(
